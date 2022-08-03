@@ -1,0 +1,115 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <random>
+#include <algorithm>
+using namespace std;
+
+const int each_mark_card_number = 13;
+const int trump_card_number = each_mark_card_number * 4;
+const int hand_card_number = 5;
+
+using Cardnumber = int;
+
+enum struct Cardmark{
+	spade, 
+	club, 
+	diamond, 
+	heart
+};
+
+struct card {
+	Cardnumber number;
+	Cardmark mark;
+};
+
+void trump(vector<card>& CARD) {
+	for (auto i = 0; i < each_mark_card_number; ++i) {
+		int number = static_cast<int>(i + 1);
+		CARD.at(i + each_mark_card_number * 0).number = number;
+		CARD.at(i + each_mark_card_number * 0).mark = Cardmark::spade;
+		CARD.at(i + each_mark_card_number * 1).number = number;
+		CARD.at(i + each_mark_card_number * 1).mark = Cardmark::club;
+		CARD.at(i + each_mark_card_number * 2).number = number;
+		CARD.at(i + each_mark_card_number * 2).mark = Cardmark::diamond;
+		CARD.at(i + each_mark_card_number * 3).number = number;
+		CARD.at(i + each_mark_card_number * 3).mark = Cardmark::heart;
+	}
+}
+
+void handcards(vector<card>& deck, vector<card>& HAND)
+{
+	while (HAND.size() < hand_card_number) {
+		HAND.push_back(deck.back());
+		deck.pop_back();
+	}
+
+	sort(HAND.begin(), HAND.end(),
+		[](const card& a, const card& b) {
+			if (a.number == b.number) {
+				return a.mark < b.mark;
+			}
+			return a.number < b.number;
+		}
+	);
+}
+
+
+string Get_mark(Cardmark card_mark) {
+	switch (card_mark) {
+	case Cardmark::spade:
+		return "SPADE";
+		break;
+	case Cardmark::club:
+		return "CLUB";
+		break;
+	case Cardmark::diamond:
+		return "DIAMOND";
+		break;
+	case Cardmark::heart:
+		return "HEART";
+		break;
+	}
+}
+
+int main()
+{
+	vector<card> CARD(trump_card_number);
+	trump(CARD);
+	sort(CARD.rbegin(), CARD.rend(),
+		[](const card& a, card& b) {
+			if (a.number == b.number) {
+				return a.mark < b.mark;
+			}
+			return a.number < b.number;
+		}
+	);
+	
+	cout << "新品のトランプカードの並びは" << endl;
+	for (auto& x : CARD) {
+		cout << Get_mark(x.mark) << " : " << static_cast<int>(x.number) << endl;
+	}
+	
+	vector<card> deck(trump_card_number);
+	trump(deck);
+
+	random_device rand_dev{};
+	mt19937 rand_engine(rand_dev());
+	shuffle(begin(deck), end(deck), rand_engine);
+	shuffle(begin(CARD), end(CARD), rand_engine);
+
+	vector<card> player_cards{};
+	handcards(deck, player_cards);
+
+	cout << endl;
+	cout << "トランプカードをよく混ぜたときの並び（山札）は" << endl;
+	for (auto& x : CARD) {
+		cout << Get_mark(x.mark) << " : " << static_cast<int>(x.number) << endl;
+	}
+
+	cout << endl;
+	cout << "山札から5枚とって並べると" << endl;
+	for (auto& card : player_cards) {
+		cout << Get_mark(card.mark) << " : " << static_cast<int>(card.number) << "\n";
+	}
+}
